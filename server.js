@@ -29,7 +29,7 @@ app.post("/create-pix", async (req, res) => {
     }
 
     if (!process.env.SYNC_API_KEY) {
-      return res.status(500).json({ error: "Missing API KEY" });
+      return res.status(500).json({ error: "API KEY não configurada" });
     }
 
     const response = await axios.post(
@@ -37,17 +37,18 @@ app.post("/create-pix", async (req, res) => {
       {
         amount: valor,
         description: "Pagamento VIP",
-        webhook_url: "https://seusite.com/webhook",
+        webhook_url: "https://webhook.site/test",
         client: {
           name: "Cliente VIP",
-          cpf: "12345678900",
+          cpf: "12345678909",
           email: "teste@email.com",
           phone: "51999999999"
         }
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.SYNC_API_KEY}`,
+          Authorization: process.env.SYNC_API_KEY,
+          "x-api-key": process.env.SYNC_API_KEY,
           Accept: "application/json",
           "Content-Type": "application/json"
         },
