@@ -11,7 +11,7 @@ app.post("/create-pix", async (req, res) => {
       {
         amount: valor,
         description: "Pagamento VIP",
-        webhook_url: "https://seusite.com/webhook", // depois você troca isso
+        webhook_url: "https://seusite.com/webhook",
         client: {
           name: "Cliente VIP",
           cpf: "12345678900",
