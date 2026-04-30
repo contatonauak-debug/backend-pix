@@ -1,66 +1,41 @@
-const express = require("express");
-const cors = require("cors");
-const axios = require("axios");
-require("dotenv").config();
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-const API_KEY = process.env.SYNC_API_KEY;
-const CLIENT_ID = process.env.SYNC_CLIENT_ID;
-
-// CRIAR PIX
 app.post("/create-pix", async (req, res) => {
   try {
-    const valor = req.body.valor || 0;
+    const valor = Number(req.body.valor || 0);
+
+    if (!valor || valor <= 0) {
+      return res.status(400).json({ error: "Valor inválido" });
+    }
 
     const response = await axios.post(
-      "https://api.syncpay.com/pix/create",
+      "https://api.syncpayments.com.br/api/partner/v1/cash-in",
       {
         amount: valor,
-        currency: "BRL"
+        description: "Pagamento VIP",
+        webhook_url: "https://seusite.com/webhook", // depois você troca isso
+        client: {
+          name: "Cliente VIP",
+          cpf: "12345678900",
+          email: "teste@email.com",
+          phone: "51999999999"
+        }
       },
       {
         headers: {
-          Authorization: `Bearer ${API_KEY}`,
-          "Content-Type": "application/json",
-          "X-Client-ID": CLIENT_ID
+          Authorization: `Bearer ${process.env.SYNC_API_KEY}`,
+          Accept: "application/json",
+          "Content-Type": "application/json"
         }
       }
     );
 
-    res.json(response.data);
+    return res.json(response.data);
 
   } catch (error) {
-    console.log(error.response?.data || error.message);
-    res.status(500).json({ error: "Erro ao gerar PIX" });
+    console.log("ERRO CREATE PIX:", error.response?.data || error.message);
+
+    return res.status(500).json({
+      error: "Erro ao gerar PIX",
+      detail: error.response?.data || error.message
+    });
   }
-});
-
-// VER STATUS
-app.get("/check-pix/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const response = await axios.get(
-      `https://api.syncpay.com/pix/status/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${API_KEY}`
-        }
-      }
-    );
-
-    res.json(response.data);
-
-  } catch (error) {
-    res.status(500).json({ error: "Erro ao verificar pagamento" });
-  }
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("Backend PIX rodando na porta " + PORT);
 });
