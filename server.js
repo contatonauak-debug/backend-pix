@@ -1,5 +1,25 @@
-console.log("🔥 NOVA VERSÃO RODANDO");
+const express = require("express");
+const cors = require("cors");
+const axios = require("axios");
+require("dotenv").config();
 
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+console.log("🔥 SERVER INICIANDO...");
+
+/* =========================
+   HEALTH CHECK
+========================= */
+app.get("/", (req, res) => {
+  res.json({ status: "Backend PIX online 🚀" });
+});
+
+/* =========================
+   CREATE PIX
+========================= */
 app.post("/create-pix", async (req, res) => {
   try {
     const valor = Number(req.body.valor || 0);
@@ -9,7 +29,7 @@ app.post("/create-pix", async (req, res) => {
     }
 
     if (!process.env.SYNC_API_KEY) {
-      return res.status(500).json({ error: "API KEY não configurada" });
+      return res.status(500).json({ error: "Missing API KEY" });
     }
 
     const response = await axios.post(
@@ -45,4 +65,13 @@ app.post("/create-pix", async (req, res) => {
       detail: error.response?.data || error.message
     });
   }
+});
+
+/* =========================
+   START SERVER
+========================= */
+const PORT = process.env.PORT || 10000;
+
+app.listen(PORT, () => {
+  console.log("🚀 Backend rodando na porta " + PORT);
 });
